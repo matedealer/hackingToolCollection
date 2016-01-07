@@ -4,12 +4,14 @@ Created on Jun 1, 2015
 @author: mft
 '''
 import json, requests
-import time
+from time import sleep
 import os
 
-oouth_token="e7ecc0fc0b6906a47cd91cda15d61faa58ce3496"
+oouth_token="you wish...."
 repo_list=[]
 found_dir = "./founds/"
+export_list=[]
+
 
 def getJSONfromURL(url):
     response = requests.get(url)
@@ -18,6 +20,13 @@ def getJSONfromURL(url):
 def getStarsFromURL(url):
     data = getJSONfromURL(url)
     return data["stargazers_count"]
+
+
+def checkLimit():
+    free = getJSONfromURL("https://api.github.com/rate_limit?access_token="+oouth_token)["resources"]["search"]["remaining"]
+    if(free==0):
+        sleep(2)
+        checkLimit()
 
 def searchmultiple(thestr, substr):
     curindex = 0
@@ -35,99 +44,90 @@ def searchmultiple(thestr, substr):
 
 
 def searchRepo(reponame, searchword):
-    if reponame in repo_list:
-        return
+
+    checkLimit()
 
     url = "https://api.github.com/search/code?q="+ searchword +"+in:file+repo:"+reponame+"&access_token="+oouth_token
     # ab hier im repo
     data = getJSONfromURL(url)
-    repo_list.append(reponame)
 
     if "items" not in data.keys() or data["total_count"] == 0:
         if "items" not in data.keys():
             print(data)
         return
-
+    export_list.append(reponame)
     print("\n\n\n=================================================================\n" + reponame + "\n")
     for item in data["items"]:
         print("============")
         print(item["path"])
         print(item["html_url"])
         print("============")
-        #print json.dumps(item, sort_keys=True, indent=4,separators=(',', ': '))
-        # data=getJSONfromURL(item["url"])
-        # if "download_url" in data.keys():
+
+
+        data=getJSONfromURL(item["url"])
+        if "download_url" in data.keys():
         #     save_path = os.path.join(found_dir, reponame)
         #     try:
         #         os.stat(save_path)
         #     except:
         #         os.makedirs(save_path)
         #
-        #     cursourcefile = requests.get(data["download_url"]).text
-        #     file_found = open(os.path.join(save_path, item["name"]),"w+")
-        #    #print json.dumps(data, sort_keys=True, indent=4,separators=(',', ': '))
+             cursourcefile = requests.get(data["download_url"]).text
+             #file_found = open(os.path.join(save_path, item["name"]),"w+")
+             #print json.dumps(data, sort_keys=True, indent=4,separators=(',', ': '))
         #
-        #     foundindices = searchmultiple(cursourcefile, searchword)
-        #     # printe das noch schoen
-        #     startpos = 0
-        #     endpos = 0
-        #     width = 200
-        #     for index in foundindices:
-        #         print("")
-        #         if index <= 100:
-        #             startpos = 0
-        #         else:
-        #             startpos = index - width
-        #
-        #         if index >= len(cursourcefile)-100:
-        #             endpos = len(cursourcefile)-1
-        #         else:
-        #             endpos = index + width
-        #
-        #         print(cursourcefile[startpos:endpos])
-        #         print("[...]")
+             foundindices = searchmultiple(cursourcefile, searchword)
+             # printe das noch schoen
+             startpos = 0
+             endpos = 0
+             width = 200
+             for index in foundindices:
+                 print("")
+                 if index <= 100:
+                     startpos = 0
+                 else:
+                     startpos = index - width
 
-        #else:
-        #    break
+                 if index >= len(cursourcefile)-100:
+                     endpos = len(cursourcefile)-1
+                 else:
+                     endpos = index + width
+
+                 print(cursourcefile[startpos:endpos])
+                 print("[...]")
+
         print("\n\n")
 
 
 #=== START HERE =====================
 if __name__ == "__main__":
-    savefile="foo_file"
+    import_file="php_repo_file"
+    export_file="php_sql_repos"
 
-    if not os.path.isfile(savefile):
-        file =open(savefile, "w+")
+
+    if not os.path.isfile(import_file):
+        exit()
     else:
-        file = open(savefile, "r")
+        file = open(import_file, "r")
         text = file.read()
 
         if text is None or text =="":
             repo_list=[]
         else:
-            repo_list=json.loads(text)
+            repo_list=[element["name"] for element in json.loads(text)]
 
 
 
-    url = "https://api.github.com/search/repositories?q=stars:>50+language:PHP+pushed:>=2015-01-15&sort=stars&order=asc&access_token="+oouth_token
 
-    data = getJSONfromURL(url)
-    count=0
-    if "items" in data.keys():
-        for repo in data["items"]:
-            count+=1
-            if repo not in repo_list:
-                print(repo["html_url"])
-                #print json.dumps(repo, sort_keys=True, indent=4, separators=(',',': '))
-                curreponame = repo["full_name"]
-                searchword = "sql"
-                searchRepo(curreponame, searchword)
+        for repo in repo_list:
+            #print json.dumps(repo, sort_keys=True, indent=4, separators=(',',': '))
+            searchword = "mysql"
+            searchRepo(repo, searchword)
 
 
-    print(count)
 
-    file = open(savefile,"w")
-    file.write(json.dumps(repo_list))
+    file = open(export_file,"w")
+    file.write(json.dumps(export_list))
 
 
 
