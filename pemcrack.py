@@ -5,10 +5,10 @@ import itertools
 import hashlib
 
 
-def bruteforce(charset, maxlength):
+def bruteforce(charset, minlength, maxlength):
     return (''.join(candidate)
         for candidate in itertools.chain.from_iterable(itertools.product(charset, repeat=i)
-        for i in range(7, maxlength + 1)))
+        for i in range(minlength, maxlength + 1)))
 
 
 
@@ -25,7 +25,7 @@ if(len(sys.argv)>2):
 else:
     i=0
     charset=list(map(str,"abcdefghijklmnopqrstuvwxyz"))
-    completList = bruteforce(charset, 8)
+    completList = bruteforce(charset,1, 8)
     for element in completList:
         retcode = subprocess.call(["openssl","rsa", "-in", filename,"-passin","pass:"+element,"-out", "dec.key"],stderr =open("/dev/null","w"))
         if(retcode==0):
