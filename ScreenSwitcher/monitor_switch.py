@@ -25,8 +25,8 @@ i3_laptop_config = homedir+".config/i3/laptop_config"
 list = []
 
 
-mapping={docking_station+LVDS:{"xrand_script":homedir+"bin/ScreenSwitcher/docking.sh", "i3_config":i3_docking_config},
-    LVDS:{"xrand_script":homedir+"bin/ScreenSwitcher/docking.sh","i3_config":i3_laptop_config}}
+mapping=[{"edid":docking_station+LVDS,"xrand_script":homedir+"bin/ScreenSwitcher/docking.sh", "i3_config":i3_docking_config},
+         {"edid":LVDS,"xrand_script":homedir+"bin/ScreenSwitcher/docking.sh","i3_config":i3_laptop_config}]
 
 
 #process =subprocess.Popen(["xrandr","--verbose"], stdout=subprocess.PIPE)
@@ -41,9 +41,9 @@ edid_list = [xrandr_output[m.start()+6:m.start()+310].replace("\\t","").replace(
 # TODO: reload i3 afterwards
 
 for item in mapping:
-    if item == set(edid_list):
-        sh.Command(mapping[item]["xrand_script"])()
-        sh.cp(mapping[item][1]["i3_config"])
+    if set(edid_list) == set(item["edid"]):
+        sh.Command(item["xrand_script"])()
+        sh.cp([item["i3_config"], i3_config])
 
 
 # if set(edid_list) == set(LVDS):
