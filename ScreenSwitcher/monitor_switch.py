@@ -26,7 +26,7 @@ list = []
 
 
 mapping=[{"edid":docking_station+LVDS,"xrand_script":homedir+"bin/ScreenSwitcher/docking.sh", "i3_config":i3_docking_config},
-         {"edid":LVDS,"xrand_script":homedir+"bin/ScreenSwitcher/docking.sh","i3_config":i3_laptop_config}]
+         {"edid":LVDS,"xrand_script":homedir+"bin/ScreenSwitcher/laptop_only.sh","i3_config":i3_laptop_config}]
 
 
 #process =subprocess.Popen(["xrandr","--verbose"], stdout=subprocess.PIPE)
@@ -66,7 +66,6 @@ with open(i3_config, "r") as f:
 
     # get list with [ workspace , output ]. i3 config is like "workspace 1 output VGA-1"
     list = [[a.strip() for a in split("output",string[m.start()+10:m.end()+6].replace("\n",""))] for m in finditer("workspace .* output", string)]
-    print(list)
 
 
 
