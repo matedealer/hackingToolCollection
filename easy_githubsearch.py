@@ -2,7 +2,7 @@ import json, requests
 import os
 from time import sleep
 
-oouth_token="e7ecc0fc0b6906a47cd91cda15d61faa58ce3496"
+oouth_token="<oouth_token>"
 repo_list=[]
 found_dir = "./founds/"
 
